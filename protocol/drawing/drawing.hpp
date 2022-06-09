@@ -1,4 +1,5 @@
-
+#ifndef LIB_PROTOCOL_DRAWING_DRAWING_HPP_
+#define LIB_PROTOCOL_DRAWING_DRAWING_HPP_
 
 
 #include <stdint.h>
@@ -30,6 +31,6 @@ Status text(Segment_t *buffer, uint8_t segmentStart_x, uint8_t segmentStart_y, u
 Status words(Segment_t *buffer, uint8_t segmentStart_x, uint8_t segmentStart_y, uint8_t segmentSize_x, uint8_t segmentSize_y, uint8_t topLeft_x, uint8_t topLeft_y, char word[], uint8_t wordLength);
 
 
-
+#endif
 
 
