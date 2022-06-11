@@ -30,17 +30,17 @@ Status lookupPixelLocation(uint8_t *byteIdx, uint8_t *bitIdx, uint8_t segmentSta
     return STATUSok;
 }
 
-Status pixelSet(Segment_t *buffer, uint8_t segmentStart_x, uint8_t segmentStart_y, uint8_t segmentSize_x, uint8_t segmentSize_y, uint8_t pixel_x, uint8_t pixel_y)
+Status pixelSet(Segment_t *segment, uint8_t segmentStart_x, uint8_t segmentStart_y, uint8_t pixel_x, uint8_t pixel_y)
 {
     // Set a pixel in the segment, if applicable
 
     uint8_t byteIdx;
     uint8_t bitIdx;
-    Status sts = lookupPixelLocation(&byteIdx, &bitIdx, segmentStart_x, segmentStart_y, segmentSize_x, segmentSize_y, pixel_x, pixel_y);
+    Status sts = lookupPixelLocation(&byteIdx, &bitIdx, segmentStart_x, segmentStart_y, segment->size_x, segment->size_y, pixel_x, pixel_y);
 
     if (sts == STATUSok)
     {
-        SetBit(bitIdx, buffer->components.pixelBuffer[byteIdx]);
+        SetBit(bitIdx, segment->data.components.pixelBuffer[byteIdx]);
 
         return STATUSok;
     }
@@ -50,16 +50,16 @@ Status pixelSet(Segment_t *buffer, uint8_t segmentStart_x, uint8_t segmentStart_
     }
 }
 
-Status pixelClear(Segment_t *buffer, uint8_t segmentStart_x, uint8_t segmentStart_y, uint8_t segmentSize_x, uint8_t segmentSize_y, uint8_t pixel_x, uint8_t pixel_y)
+Status pixelClear(Segment_t *segment, uint8_t segmentStart_x, uint8_t segmentStart_y, uint8_t pixel_x, uint8_t pixel_y)
 {
     // Clear a pixel in the segment, if applicable
     uint8_t byteIdx;
     uint8_t bitIdx;
-    Status sts = lookupPixelLocation(&byteIdx, &bitIdx, segmentStart_x, segmentStart_y, segmentSize_x, segmentSize_y, pixel_x, pixel_y);
+    Status sts = lookupPixelLocation(&byteIdx, &bitIdx, segmentStart_x, segmentStart_y, segment->size_x, segment->size_y, pixel_x, pixel_y);
 
     if (sts == STATUSok)
     {
-        ClearBit(bitIdx, buffer->components.pixelBuffer[byteIdx]);
+        ClearBit(bitIdx, segment->data.components.pixelBuffer[byteIdx]);
 
         return STATUSok;
     }
@@ -69,7 +69,7 @@ Status pixelClear(Segment_t *buffer, uint8_t segmentStart_x, uint8_t segmentStar
     }
 }
 
-Status text(Segment_t *buffer, uint8_t segmentStart_x, uint8_t segmentStart_y, uint8_t segmentSize_x, uint8_t segmentSize_y, uint8_t topLeft_x, uint8_t topLeft_y, char character)
+Status text(Segment_t *segment, uint8_t segmentStart_x, uint8_t segmentStart_y, uint8_t topLeft_x, uint8_t topLeft_y, char character)
 {
     // Draw a text character if it is appplicable to the segment at all
     // First check if any of the character is useful
@@ -111,15 +111,15 @@ Status text(Segment_t *buffer, uint8_t segmentStart_x, uint8_t segmentStart_y, u
     {
         uint8_t x = topLeft_x + pixels[pxNum] - charWidth * (pixels[pxNum] / charWidth); // Remember, integer division floors
         uint8_t y = topLeft_y + pixels[pxNum] / charWidth;
-        Status sts = lookupPixelLocation(&byteIdx, &bitIdx, segmentStart_x, segmentStart_y, segmentSize_x, segmentSize_y, y, x);
+        Status sts = lookupPixelLocation(&byteIdx, &bitIdx, segmentStart_x, segmentStart_y, segment->size_x, segment->size_y, y, x);  // Flip y, x for reasons???
         if (sts == STATUSok)
         {
-            ClearBit(bitIdx, buffer->components.pixelBuffer[byteIdx]);
+            ClearBit(bitIdx, segment->data.components.pixelBuffer[byteIdx]);
         }
     }
 }
 
-Status words(Segment_t *buffer, uint8_t segmentStart_x, uint8_t segmentStart_y, uint8_t segmentSize_x, uint8_t segmentSize_y, uint8_t topLeft_x, uint8_t topLeft_y, char word[], uint8_t wordLength)
+Status words(Segment_t *segment, uint8_t segmentStart_x, uint8_t segmentStart_y, uint8_t topLeft_x, uint8_t topLeft_y, char word[], uint8_t wordLength)
 {
     // Write a word into the segment
 
@@ -130,7 +130,7 @@ Status words(Segment_t *buffer, uint8_t segmentStart_x, uint8_t segmentStart_y, 
 
     for (int charIdx = 0; charIdx < wordLength; charIdx++)
     {
-        text(buffer, segmentStart_x, segmentStart_y, segmentSize_x, segmentSize_y, x, y, word[charIdx]);
+        text(segment, segmentStart_x, segmentStart_y, x, y, word[charIdx]);
         x = x + spaceWidth + fontWidthGet(word[charIdx]);
     }
 }
