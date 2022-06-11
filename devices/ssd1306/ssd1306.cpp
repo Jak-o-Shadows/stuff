@@ -1,24 +1,13 @@
 
-#include "devices/ssd1306/ssd1306.h"
+#include "devices/ssd1306/ssd1306.hpp"
 
-Status sendCommands(SSD1306 *dev, uint8_t commands[], uint8_t numCommands)
+Status sendCommands(SSD1306_t *dev, uint8_t commands[], uint8_t numCommands)
 {
-
     uint8_t commandAddress = 0; // D/C = 0, Co = 0
-
-    // Probably a nicer way of doing this?
-    uint8_t commandBuffer[1 + 256]; // Size hardcoded to type of `numCommands`
-
-    // Starts with the commandAddress
-    commandBuffer[0] = commandAddress;
-    for (int i = 0; i < numCommands; i++)
-    {
-        commandBuffer[i + 1] = commands[i];
-    }
-    return i2cSendBytes(I2C2, dev->address, commandBuffer, 1 + numCommands);
+    return i2cMaster_sendreg(dev->i2c, dev->address, commandAddress, commands, numCommands);
 }
 
-Status init(SSD1306 *dev)
+Status init(SSD1306_t *dev)
 {
 
     uint8_t commands[] = {
@@ -70,4 +59,57 @@ Status init(SSD1306 *dev)
     return sendCommands(dev, commands, numCommands);
 
     return STATUSok;
+}
+
+void OLED_address(SSD1306_t *dev, uint8_t x, uint8_t y)
+{
+    uint8_t commands[] = {
+        // Set column addressing
+        0x21,
+        0x00,
+        128 - 1,
+        // Set page addressing extents
+        0x22,
+        0x00,
+        32 / 8 - 1};
+    sendCommands(dev, commands, 6);
+}
+
+// Scrolling
+Status setupScroll(SSD1306_t *dev, bool scrollRight)
+{
+    uint8_t scrollDir;
+    if (scrollRight)
+    {
+        scrollDir = 0x26;
+    }
+    else
+    {
+        scrollDir = 0x27;
+    }
+
+    uint8_t commands[] = {
+        scrollDir, // Command - scroll left or right
+        0x00,      // Dummy Byte
+        0,         // Start page address
+        0,         // Scroll update rate - non-linear mapping in terms of frames form data sheet
+        0x0F,      // End page address
+        0,         // Dummy Byte
+        0xFF       // Dummy Byte
+    };
+    return sendCommands(dev, commands, 7);
+}
+
+Status scrollState(SSD1306_t *dev, bool enabled)
+{
+    uint8_t bytes;
+    if (enabled)
+    {
+        bytes = 0x2F;
+    }
+    else
+    {
+        bytes = 0x2E;
+    }
+    return sendCommands(dev, &bytes, 1);
 }
