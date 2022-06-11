@@ -4,7 +4,10 @@
 
 #include <stdint.h>
 
+#include "macros.h"
 #include "status.hpp"
+
+#include "protocol/drawing/fonts.h"
 
 #define WIDTH 32
 #define HEIGHT 128

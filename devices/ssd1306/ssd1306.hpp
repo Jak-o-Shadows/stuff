@@ -1,6 +1,8 @@
 
 #include <stdint.h>
 
+#include "status.h"
+
 // SDS1036 OLED Specific
 
 typedef enum state_e
