@@ -22,7 +22,7 @@ Status lookupPixelLocation(uint8_t *byteIdx, uint8_t *bitIdx, uint8_t segmentSta
     //  Now, the bytes go x, then y. Always.
     uint8_t local_x = pixel_x - segmentStart_x;
     uint8_t local_y = pixel_y - segmentStart_y;
-    uint8_t byteColumnIndex = local_x / 8;
+    uint8_t byteColumnIndex = local_x / 8;  // Integer divide floors
     uint8_t byteRowIndex = local_y;
     *byteIdx = (byteRowIndex * segmentSize_x / 8) + byteColumnIndex;
     *bitIdx = local_x - byteColumnIndex * 8;
@@ -60,6 +60,25 @@ Status pixelClear(Segment_t *segment, uint8_t segmentStart_x, uint8_t segmentSta
     if (sts == STATUSok)
     {
         ClearBit(bitIdx, segment->data.components.pixelBuffer[byteIdx]);
+
+        return STATUSok;
+    }
+    else
+    {
+        return sts;
+    }
+}
+
+Status pixelInvert(Segment_t *segment, uint8_t segmentStart_x, uint8_t segmentStart_y, uint8_t pixel_x, uint8_t pixel_y)
+{
+    // Invert a pixel in the segment, if applicable
+    uint8_t byteIdx;
+    uint8_t bitIdx;
+    Status sts = lookupPixelLocation(&byteIdx, &bitIdx, segmentStart_x, segmentStart_y, segment->size_x, segment->size_y, pixel_x, pixel_y);
+
+    if (sts == STATUSok)
+    {
+        InvertBit(bitIdx, segment->data.components.pixelBuffer[byteIdx]);
 
         return STATUSok;
     }
@@ -114,7 +133,7 @@ Status text(Segment_t *segment, uint8_t segmentStart_x, uint8_t segmentStart_y, 
         Status sts = lookupPixelLocation(&byteIdx, &bitIdx, segmentStart_x, segmentStart_y, segment->size_x, segment->size_y, y, x);  // Flip y, x for reasons???
         if (sts == STATUSok)
         {
-            ClearBit(bitIdx, segment->data.components.pixelBuffer[byteIdx]);
+            InvertBit(bitIdx, segment->data.components.pixelBuffer[byteIdx]);
         }
     }
 }

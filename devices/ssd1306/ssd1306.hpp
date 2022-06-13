@@ -30,6 +30,9 @@ typedef struct
     uint32_t i2c;
 } SSD1306_t;
 
+#define SCREEN_HEIGHT 128
+#define SCREEN_WIDTH 32
+
 void OLED_address(SSD1306_t *dev, uint8_t x, uint8_t y);
 
 Status sendCommands(SSD1306_t *dev, uint8_t commands[], uint8_t numCommands);

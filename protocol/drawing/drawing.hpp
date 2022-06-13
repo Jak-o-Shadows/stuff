@@ -10,8 +10,8 @@
 #include "protocol/drawing/fonts.h"
 
 #define WIDTH 32
-#define HEIGHT 128
-#define segmentPixelCount WIDTH
+#define HEIGHT 1
+#define segmentPixelCount WIDTH*HEIGHT
 #define segmentCommandSize segmentPixelCount / 8 + 1
 typedef struct Segment_t{
     union Segment_u {
@@ -32,6 +32,8 @@ Status lookupPixelLocation(uint8_t *byteIdx, uint8_t *bitIdx, uint8_t segmentSta
 Status pixelSet(Segment_t *segment, uint8_t segmentStart_x, uint8_t segmentStart_y, uint8_t pixel_x, uint8_t pixel_y);
 
 Status pixelClear(Segment_t *segment, uint8_t segmentStart_x, uint8_t segmentStart_y, uint8_t pixel_x, uint8_t pixel_y);
+
+Status pixelInvert(Segment_t *segment, uint8_t segmentStart_x, uint8_t segmentStart_y, uint8_t pixel_x, uint8_t pixel_y);
 
 Status text(Segment_t *segment, uint8_t segmentStart_x, uint8_t segmentStart_y, uint8_t topLeft_x, uint8_t topLeft_y, char character);
 
