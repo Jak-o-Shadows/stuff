@@ -29,3 +29,4 @@ Status lookupPixelLocation(uint8_t *byteIdx, uint8_t *bitIdx, uint8_t segmentSta
 
     return STATUSok;
 }
+

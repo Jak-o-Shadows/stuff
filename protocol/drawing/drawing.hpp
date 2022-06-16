@@ -10,7 +10,7 @@
 #include "protocol/drawing/fonts.h"
 
 #define WIDTH 32
-#define HEIGHT 16
+#define HEIGHT 32
 
 template<int BUF_LEN>
 struct Segment_t{
@@ -41,7 +41,8 @@ public:
 
     Display();
 
-
+    uint8_t getSegmentXCoord(uint8_t segmentNum);
+    uint8_t getSegmentYCoord(uint8_t segmentNum);
 
 };
 
@@ -204,6 +205,11 @@ Status words(Segment_t<BUF_LEN> *segment, uint8_t segmentStart_x, uint8_t segmen
     return STATUSok;
 }
 
+
+
+
+// Class functions
+
 template<int DW, int DH, int SW, int SH, int NUM_SEG>
 Display<DW, DH, SW, SH, NUM_SEG>::Display() {
     for( int i = 0 ;i<num_segments;i++ ) {
@@ -212,6 +218,23 @@ Display<DW, DH, SW, SH, NUM_SEG>::Display() {
         segments[i].size_y = segment_height;
     }
 }
+
+
+template<int DW, int DH, int SW, int SH, int NUM_SEG>
+uint8_t Display<DW, DH, SW, SH, NUM_SEG>::getSegmentXCoord(uint8_t segmentNum){
+    uint8_t segmentsPerRow = display_width/segment_width;
+    return segment_width*(segmentNum % segmentsPerRow);
+}
+
+
+template<int DW, int DH, int SW, int SH, int NUM_SEG>
+uint8_t Display<DW, DH, SW, SH, NUM_SEG>::getSegmentYCoord(uint8_t segmentNum){
+    uint8_t segmentsPerCol = display_height/segment_height;
+    return segment_height*(segmentNum % segmentsPerCol);
+}
+
+
+
 
 
 
