@@ -106,3 +106,65 @@ Status i2cMaster_send(uint32_t i2c, uint8_t addr, uint8_t data[], uint8_t numDat
 }
 
 
+Status i2cMaster_readreg(uint32_t i2c, uint8_t addr, uint8_t reg, uint8_t data[], uint8_t numData){
+
+    // Butcher the i2c_transfer7 from http://libopencm3.org/docs/latest/stm32f1/html/group__i2c__file.html#gaf3d168765388b62e0a798fc9aedc8291
+    //  Into one function as do not have an up to date version of libopencm3
+
+    // Write dest addr
+         while ((I2C_SR2(i2c) & I2C_SR2_BUSY)) {
+         }
+  
+         i2c_send_start(i2c);
+  
+         // Wait for the end of the start condition, master mode selected, and BUSY bit set
+         while ( !( (I2C_SR1(i2c) & I2C_SR1_SB)
+                 && (I2C_SR2(i2c) & I2C_SR2_MSL)
+                 && (I2C_SR2(i2c) & I2C_SR2_BUSY) ));
+  
+         i2c_send_7bit_address(i2c, addr, I2C_WRITE);
+  
+         // Waiting for address is transferred.
+         while (!(I2C_SR1(i2c) & I2C_SR1_ADDR));
+  
+         // Clearing ADDR condition sequence.
+         (void)I2C_SR2(i2c);
+
+        i2c_send_data(i2c, reg);
+        while (!(I2C_SR1(i2c) & (I2C_SR1_BTF)));
+
+
+    // Receive data
+    //  The STM32F1 i2c hardware is BROKEN when receiving multiple bytes at a time.
+    //  (see the erratta - DocID14574 Rev 13).
+    //  Hence just do it one byte at a time, hence halving the throughput
+
+    for (int i = 0; i < numData; ++i) {
+
+        i2c_send_start(i2c);
+        i2c_disable_ack(i2c);
+
+        // Wait for the end of the start condition, master mode selected, and BUSY bit set
+        while ( !( (I2C_SR1(i2c) & I2C_SR1_SB)
+                && (I2C_SR2(i2c) & I2C_SR2_MSL)
+                && (I2C_SR2(i2c) & I2C_SR2_BUSY) ));
+
+        i2c_send_7bit_address(i2c, addr, I2C_READ);
+
+        // Waiting for address is transferred.
+        while (!(I2C_SR1(i2c) & I2C_SR1_ADDR));
+        // Clearing ADDR condition sequence.
+        (void)I2C_SR2(i2c);
+
+        i2c_send_stop(i2c);
+
+            while (!(I2C_SR1(i2c) & I2C_SR1_RxNE));
+            data[i] = i2c_get_data(i2c);
+    }
+    i2c_send_stop(i2c);
+
+    (void)I2C_SR2(i2c);
+    (void)I2C_SR1(i2c);
+
+    return STATUSok;
+}

@@ -11,4 +11,6 @@ Status i2cMaster_sendreg(uint32_t i2c, uint8_t addr, uint8_t reg, uint8_t data[]
 
 Status i2cMaster_send(uint32_t i2c, uint8_t addr, uint8_t data[], uint8_t numData);
 
+Status i2cMaster_readreg(uint32_t i2c, uint8_t addr, uint8_t reg, uint8_t data[], uint8_t numData);
+
 #endif
